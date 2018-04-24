@@ -22,8 +22,13 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
+import org.openmrs.Person;
+import org.openmrs.PersonName;
 import org.openmrs.RelationshipType;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.db.hibernate.HibernatePatientDAO;
+import org.openmrs.api.db.hibernate.PersonLuceneQuery;
+import org.openmrs.api.db.hibernate.search.LuceneQuery;
 import org.openmrs.module.bahmniemrapi.visitlocation.BahmniVisitLocationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -98,6 +103,66 @@ public class PatientDaoImpl implements PatientDao {
                 }).filter(Objects::nonNull)
                 .collect(toList());
         return patientResponses;
+    }
+
+    @Override
+    public List<PatientResponse> getSimilarPatientsUsingLuceneSearch(String identifier, String name, String gender, String customAttribute,
+                                                              String addressFieldName, String addressFieldValue, Integer length,
+                                                              Integer offset, String[] customAttributeFields, String programAttributeFieldValue,
+                                                              String programAttributeFieldName, String[] addressSearchResultFields,
+                                                              String[] patientSearchResultFields, String loginLocationUuid,
+                                                              Boolean filterPatientsByLocation, Boolean filterOnAllIdentifiers) {
+
+        validateSearchParams(customAttributeFields, programAttributeFieldName, addressFieldName);
+        PatientResponseMapper patientResponseMapper = new PatientResponseMapper(Context.getVisitService(),new BahmniVisitLocationServiceImpl(Context.getLocationService()));
+
+        List<Patient> patients = getPatientsByNameAndGender(name, gender, length);
+        List<Integer> patientIds = patients.stream().map(patient -> patient.getPatientId()).collect(toList());
+        Map<Object, Object> programAttributes = Context.getService(BahmniProgramWorkflowService.class).getPatientProgramAttributeByAttributeName(patientIds, programAttributeFieldName);
+        Set<Integer> uniquePatientIds = new HashSet<>();
+        List<PatientResponse> patientResponses = patients.stream()
+                .map(patient -> {
+                    if(!uniquePatientIds.contains(patient.getPatientId())) {
+                        PatientResponse patientResponse = patientResponseMapper.map(patient, loginLocationUuid, patientSearchResultFields, addressSearchResultFields,
+                                programAttributes.get(patient.getPatientId()));
+                        uniquePatientIds.add(patient.getPatientId());
+                        return patientResponse;
+                    }else
+                        return null;
+                }).filter(Objects::nonNull)
+                .collect(toList());
+        return patientResponses;
+    }
+
+
+    private List<Patient> getPatientsByNameAndGender(String name, String gender, Integer length) {
+        HibernatePatientDAO patientDAO = new HibernatePatientDAO();
+        patientDAO.setSessionFactory(sessionFactory);
+        List<Patient> patients = new ArrayList<Patient>();
+        String query = LuceneQuery.escapeQuery(name);
+        PersonLuceneQuery personLuceneQuery = new PersonLuceneQuery(sessionFactory);
+        LuceneQuery<PersonName> nameQuery = personLuceneQuery.getPatientNameQueryWithOrParser(query, false);
+        /* person.gender does not work somehow in LuceneQuery, so the dirty way is to filter result with person's gender */
+        // if(gender != null && !gender.isEmpty()){
+        //     nameQuery.include("person.gender", gender);
+        // }
+        List<PersonName> persons = nameQuery.list().stream()
+                                    .filter(
+                                        personName ->
+                                            personName.getPreferred()
+                                            && checkGender(personName.getPerson(), gender)
+                                    ).collect(toList());
+        persons = persons.subList(0, Math.min(length, persons.size()));
+        persons.forEach(person -> patients.add(patientDAO.getPatient(person.getPerson().getPersonId())));
+        return patients;
+    }
+
+    private Boolean checkGender(Person person, String gender) {
+        if(gender != null && !gender.isEmpty()){
+            return gender.equals(person.getGender());
+        } else {
+            return true;
+        }
     }
 
     private List<PatientIdentifier> getPatientIdentifiers(String identifier, Boolean filterOnAllIdentifiers, Integer offset, Integer length) {

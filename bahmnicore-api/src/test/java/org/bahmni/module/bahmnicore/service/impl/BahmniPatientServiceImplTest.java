@@ -1,5 +1,7 @@
 package org.bahmni.module.bahmnicore.service.impl;
 
+import org.bahmni.module.bahmnicore.contract.patient.PatientSearchParameters;
+import org.bahmni.module.bahmnicore.contract.patient.mapper.PatientResponseMapper;
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientConfigResponse;
 import org.bahmni.module.bahmnicore.dao.PatientDao;
 import org.junit.Before;
@@ -67,4 +69,5 @@ public class BahmniPatientServiceImplTest {
         bahmniPatientService.get("partial_identifier", shouldMatchExactPatientId);
         verify(patientDao).getPatients("partial_identifier", shouldMatchExactPatientId);
     }
+
 }

@@ -1,21 +1,27 @@
 package org.bahmni.module.bahmnicore.service.impl;
 
 import org.bahmni.module.bahmnicore.contract.patient.PatientSearchParameters;
+import org.bahmni.module.bahmnicore.contract.patient.mapper.PatientResponseMapper;
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientConfigResponse;
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
 import org.bahmni.module.bahmnicore.dao.PatientDao;
 import org.bahmni.module.bahmnicore.service.BahmniPatientService;
 import org.openmrs.Concept;
 import org.openmrs.Patient;
+import org.openmrs.Person;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.RelationshipType;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.PersonService;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.bahmniemrapi.visitlocation.BahmniVisitLocationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Lazy //to get rid of cyclic dependencies
@@ -69,6 +75,25 @@ public class BahmniPatientServiceImpl implements BahmniPatientService {
     public List<PatientResponse> luceneSearch(PatientSearchParameters searchParameters) {
         return patientDao.getPatientsUsingLuceneSearch(searchParameters.getIdentifier(),
                 searchParameters.getName(),
+                searchParameters.getCustomAttribute(),
+                searchParameters.getAddressFieldName(),
+                searchParameters.getAddressFieldValue(),
+                searchParameters.getLength(),
+                searchParameters.getStart(),
+                searchParameters.getPatientAttributes(),
+                searchParameters.getProgramAttributeFieldValue(),
+                searchParameters.getProgramAttributeFieldName(),
+                searchParameters.getAddressSearchResultFields(),
+                searchParameters.getPatientSearchResultFields(),
+                searchParameters.getLoginLocationUuid(),
+                searchParameters.getFilterPatientsByLocation(), searchParameters.getFilterOnAllIdentifiers());
+    }
+
+    @Override
+    public List<PatientResponse> searchSimilarPatients(PatientSearchParameters searchParameters) {
+        return patientDao.getSimilarPatientsUsingLuceneSearch(searchParameters.getIdentifier(),
+                searchParameters.getName(),
+                searchParameters.getGender(),
                 searchParameters.getCustomAttribute(),
                 searchParameters.getAddressFieldName(),
                 searchParameters.getAddressFieldValue(),

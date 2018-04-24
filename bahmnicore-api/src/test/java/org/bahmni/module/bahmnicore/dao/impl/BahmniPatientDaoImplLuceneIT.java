@@ -213,4 +213,35 @@ public class BahmniPatientDaoImplLuceneIT extends BaseIntegrationTest {
         assertTrue(patient.getExtraIdentifiers().contains("200006"));
     }
 
+    @Test
+    public void shouldSearchSimilarPatientByPatientName() {
+        String[] addressResultFields = {"city_village"};
+        List<PatientResponse> patients = patientDao.getSimilarPatientsUsingLuceneSearch("", "Peet", "", null, "city_village", "", 100, 0, null,"",null,addressResultFields,null, "c36006e5-9fbb-4f20-866b-0ece245615a1", false, false);
+        PatientResponse patient1 = patients.get(0);
+        PatientResponse patient2 = patients.get(1);
+        
+        assertEquals(2, patients.size());
+        assertEquals(patient1.getGivenName(), "Horatio");
+        assertEquals(patient1.getMiddleName(), "Peeter");
+        assertEquals(patient1.getFamilyName(), "Sinha");
+        assertEquals(patient2.getGivenName(), "John");
+        assertEquals(patient2.getMiddleName(), "Peeter");
+        assertEquals(patient2.getFamilyName(), "Sinha");
+    }
+
+    @Test
+    public void shouldSearchSimilarPatientByPatientNameAndGender() {
+        String[] addressResultFields = {"city_village"};
+        List<PatientResponse> patients = patientDao.getSimilarPatientsUsingLuceneSearch("", "Peet", "F", null, "city_village", "", 100, 0, null,"",null,addressResultFields,null, "c36006e5-9fbb-4f20-866b-0ece245615a1", false, false);
+        PatientResponse patient1 = patients.get(0);
+        
+        for(PatientResponse response: patients) {
+            System.out.println(response.getGivenName() + " " + response.getMiddleName() + " " + response.getFamilyName());
+        }
+        assertEquals(1, patients.size());
+        assertEquals(patient1.getGivenName(), "John");
+        assertEquals(patient1.getMiddleName(), "Peeter");
+        assertEquals(patient1.getFamilyName(), "Sinha");
+    }
+
 }

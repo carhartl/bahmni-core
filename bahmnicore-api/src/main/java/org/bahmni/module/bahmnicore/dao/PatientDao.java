@@ -3,6 +3,7 @@ package org.bahmni.module.bahmnicore.dao;
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
 import org.openmrs.Patient;
 import org.openmrs.RelationshipType;
+import org.openmrs.module.emrapi.patient.PatientProfile;
 
 import java.util.List;
 
@@ -18,6 +19,12 @@ public interface PatientDao {
                                                        Integer offset, String[] customAttributeFields, String programAttributeFieldValue,
                                                        String programAttributeFieldName, String[] addressSearchResultFields,
                                                        String[] patientSearchResultFields, String loginLocationUuid, Boolean filterPatientsByLocation, Boolean filterOnAllIdentifiers);
+
+    List<PatientResponse> getSimilarPatientsUsingLuceneSearch(String identifer, String name, String gender, String customAttribute,
+                                                        String addressFieldName, String addressFieldValue, Integer length,
+                                                        Integer offset, String[] customAttributeFields, String programAttributeFieldValue,
+                                                        String programAttributeFieldName, String[] addressSearchResultFields,
+                                                        String[] patientSearchResultFields, String loginLocationUuid, Boolean filterPatientsByLocation, Boolean filterOnAllIdentifiers);
 
     public Patient getPatient(String identifier);
 
