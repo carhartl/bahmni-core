@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.openmrs.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -215,11 +214,10 @@ public class BahmniPatientDaoImplLuceneIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSearchSimilarPatientByPatientName() {
-        String[] addressResultFields = {"city_village"};
-        List<PatientResponse> patients = patientDao.getSimilarPatientsUsingLuceneSearch("", "Peet", "", null, "city_village", "", 100, 0, null,"",null,addressResultFields,null, "c36006e5-9fbb-4f20-866b-0ece245615a1", false, false);
+        List<PatientResponse> patients = patientDao.getSimilarPatientsUsingLuceneSearch("Peet", "", "c36006e5-9fbb-4f20-866b-0ece245615a1", 5);
         PatientResponse patient1 = patients.get(0);
         PatientResponse patient2 = patients.get(1);
-        
+
         assertEquals(2, patients.size());
         assertEquals(patient1.getGivenName(), "Horatio");
         assertEquals(patient1.getMiddleName(), "Peeter");
@@ -230,18 +228,27 @@ public class BahmniPatientDaoImplLuceneIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldSearchSimilarPatientByPatientNameAndUseLimitResult() {
+        List<PatientResponse> patients = patientDao.getSimilarPatientsUsingLuceneSearch("Peet", "", "c36006e5-9fbb-4f20-866b-0ece245615a1", 1);
+        assertEquals("Should limit number of results",1, patients.size());
+        PatientResponse patient1 = patients.get(0);
+
+        assertEquals(patient1.getGivenName(), "Horatio");
+        assertEquals(patient1.getMiddleName(), "Peeter");
+        assertEquals(patient1.getFamilyName(), "Sinha");
+    }
+
+    @Test
     public void shouldSearchSimilarPatientByPatientNameAndGender() {
-        String[] addressResultFields = {"city_village"};
-        List<PatientResponse> patients = patientDao.getSimilarPatientsUsingLuceneSearch("", "Peet", "F", null, "city_village", "", 100, 0, null,"",null,addressResultFields,null, "c36006e5-9fbb-4f20-866b-0ece245615a1", false, false);
+        List<PatientResponse> patients = patientDao.getSimilarPatientsUsingLuceneSearch("Peet", "F", "c36006e5-9fbb-4f20-866b-0ece245615a1", 5);
         PatientResponse patient1 = patients.get(0);
         
-        for(PatientResponse response: patients) {
-            System.out.println(response.getGivenName() + " " + response.getMiddleName() + " " + response.getFamilyName());
-        }
         assertEquals(1, patients.size());
         assertEquals(patient1.getGivenName(), "John");
         assertEquals(patient1.getMiddleName(), "Peeter");
         assertEquals(patient1.getFamilyName(), "Sinha");
     }
+
+    //TODO missing tests: by limit, parameters verification
 
 }

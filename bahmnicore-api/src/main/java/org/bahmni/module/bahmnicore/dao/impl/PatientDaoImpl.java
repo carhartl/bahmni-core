@@ -32,15 +32,9 @@ import org.openmrs.api.db.hibernate.search.LuceneQuery;
 import org.openmrs.module.bahmniemrapi.visitlocation.BahmniVisitLocationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
-import static java.util.stream.Collectors.reducing;
+import java.util.*;
+
 import static java.util.stream.Collectors.toList;
 
 @Repository
@@ -93,47 +87,38 @@ public class PatientDaoImpl implements PatientDao {
         List<PatientResponse> patientResponses = patientIdentifiers.stream()
                 .map(patientIdentifier -> {
                     Patient patient = patientIdentifier.getPatient();
-                    if(!uniquePatientIds.contains(patient.getPatientId())) {
-                        PatientResponse patientResponse = patientResponseMapper.map(patient, loginLocationUuid, patientSearchResultFields, addressSearchResultFields,
-                                programAttributes.get(patient.getPatientId()));
-                        uniquePatientIds.add(patient.getPatientId());
-                        return patientResponse;
-                    }else
-                        return null;
+                    return toPatientResponse(patientResponseMapper, patient, loginLocationUuid, addressSearchResultFields, patientSearchResultFields, programAttributes, uniquePatientIds);
                 }).filter(Objects::nonNull)
                 .collect(toList());
         return patientResponses;
     }
 
     @Override
-    public List<PatientResponse> getSimilarPatientsUsingLuceneSearch(String identifier, String name, String gender, String customAttribute,
-                                                              String addressFieldName, String addressFieldValue, Integer length,
-                                                              Integer offset, String[] customAttributeFields, String programAttributeFieldValue,
-                                                              String programAttributeFieldName, String[] addressSearchResultFields,
-                                                              String[] patientSearchResultFields, String loginLocationUuid,
-                                                              Boolean filterPatientsByLocation, Boolean filterOnAllIdentifiers) {
-
-        validateSearchParams(customAttributeFields, programAttributeFieldName, addressFieldName);
+    public List<PatientResponse> getSimilarPatientsUsingLuceneSearch(String name, String gender, String loginLocationUuid, Integer length) {
         PatientResponseMapper patientResponseMapper = new PatientResponseMapper(Context.getVisitService(),new BahmniVisitLocationServiceImpl(Context.getLocationService()));
-
         List<Patient> patients = getPatientsByNameAndGender(name, gender, length);
-        List<Integer> patientIds = patients.stream().map(patient -> patient.getPatientId()).collect(toList());
-        Map<Object, Object> programAttributes = Context.getService(BahmniProgramWorkflowService.class).getPatientProgramAttributeByAttributeName(patientIds, programAttributeFieldName);
         Set<Integer> uniquePatientIds = new HashSet<>();
+        // TODO BAH-460 Maybe we can remove the new HashMap<>() from the call. It used to be response from validateSearchParams(...)
         List<PatientResponse> patientResponses = patients.stream()
-                .map(patient -> {
-                    if(!uniquePatientIds.contains(patient.getPatientId())) {
-                        PatientResponse patientResponse = patientResponseMapper.map(patient, loginLocationUuid, patientSearchResultFields, addressSearchResultFields,
-                                programAttributes.get(patient.getPatientId()));
-                        uniquePatientIds.add(patient.getPatientId());
-                        return patientResponse;
-                    }else
-                        return null;
-                }).filter(Objects::nonNull)
+                .map(patient -> toPatientResponse(patientResponseMapper, patient, loginLocationUuid, new HashMap<>(), uniquePatientIds)).filter(Objects::nonNull)
                 .collect(toList());
         return patientResponses;
     }
 
+    private PatientResponse toPatientResponse(PatientResponseMapper patientResponseMapper, Patient patient, String loginLocationUuid, Map<Object, Object> programAttributes, Set<Integer> uniquePatientIds) {
+        return toPatientResponse(patientResponseMapper, patient, loginLocationUuid, null, null, programAttributes, uniquePatientIds);
+    }
+
+    private PatientResponse toPatientResponse(PatientResponseMapper patientResponseMapper, Patient patient, String loginLocationUuid, String[] addressSearchResultFields, String[] patientSearchResultFields, Map<Object, Object> programAttributes, Set<Integer> uniquePatientIds) {
+        if(!uniquePatientIds.contains(patient.getPatientId())) {
+            PatientResponse patientResponse = patientResponseMapper.map(patient, loginLocationUuid, patientSearchResultFields, addressSearchResultFields,
+                    programAttributes.get(patient.getPatientId()));
+            uniquePatientIds.add(patient.getPatientId());
+            return patientResponse;
+        } else {
+            return null;
+        }
+    }
 
     private List<Patient> getPatientsByNameAndGender(String name, String gender, Integer length) {
         HibernatePatientDAO patientDAO = new HibernatePatientDAO();
@@ -153,9 +138,10 @@ public class PatientDaoImpl implements PatientDao {
                                             && checkGender(personName.getPerson(), gender)
                                     ).collect(toList());
         persons = persons.subList(0, Math.min(length, persons.size()));
-        persons.forEach(person -> patients.add(patientDAO.getPatient(person.getPerson().getPersonId())));
+        persons.forEach(person -> patients.add(new Patient(person.getPerson())));
         return patients;
     }
+
 
     private Boolean checkGender(Person person, String gender) {
         if(gender != null && !gender.isEmpty()){
