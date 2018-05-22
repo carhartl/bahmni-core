@@ -72,9 +72,6 @@ public class BahmniPatientServiceImplTest {
         verify(patientDao).getPatients("partial_identifier", shouldMatchExactPatientId);
     }
 
-    // TODO BAH-460 Add test that verifies call to PatioenDaoImpl for searching similar patients
-
-
     @Test
     public void shouldCallgetSimilarPatientsUsingLuceneSearch() {
         HttpServletRequest request = mock(HttpServletRequest.class);
