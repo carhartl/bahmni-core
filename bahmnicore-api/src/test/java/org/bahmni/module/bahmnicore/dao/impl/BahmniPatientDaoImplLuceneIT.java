@@ -248,7 +248,4 @@ public class BahmniPatientDaoImplLuceneIT extends BaseIntegrationTest {
         assertEquals(patient1.getMiddleName(), "Peeter");
         assertEquals(patient1.getFamilyName(), "Sinha");
     }
-
-    //TODO missing tests: by limit, parameters verification
-
 }
