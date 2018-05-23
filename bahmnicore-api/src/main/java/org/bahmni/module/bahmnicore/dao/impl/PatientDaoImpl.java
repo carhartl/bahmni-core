@@ -128,10 +128,6 @@ public class PatientDaoImpl implements PatientDao {
         String query = LuceneQuery.escapeQuery(name);
         PersonLuceneQuery personLuceneQuery = new PersonLuceneQuery(sessionFactory);
         LuceneQuery<PersonName> nameQuery = personLuceneQuery.getPatientNameQueryWithOrParser(query, false);
-        /* person.gender does not work somehow in LuceneQuery, so the dirty way is to filter result with person's gender */
-        // if(gender != null && !gender.isEmpty()){
-        //     nameQuery.include("person.gender", gender);
-        // }
         List<PersonName> persons = nameQuery.list().stream()
                                     .filter(
                                         personName ->
