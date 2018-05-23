@@ -93,7 +93,6 @@ public class PatientDaoImpl implements PatientDao {
         return patientResponses;
     }
 
-    // TODO BAH-460 create a class for the search fields
     @Override
     public List<PatientResponse> getSimilarPatientsUsingLuceneSearch(String name, String gender, String loginLocationUuid, Integer length) {
         PatientResponseMapper patientResponseMapper = new PatientResponseMapper(Context.getVisitService(),new BahmniVisitLocationServiceImpl(Context.getLocationService()));
