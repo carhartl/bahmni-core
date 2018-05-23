@@ -31,6 +31,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import static java.util.Arrays.*;
+
 @Component
 public class BahmniDiagnosisServiceImpl implements BahmniDiagnosisService {
     private EncounterService encounterService;
@@ -80,8 +82,8 @@ public class BahmniDiagnosisServiceImpl implements BahmniDiagnosisService {
     private List<Diagnosis> getDiagnosisByPatient(Patient patient, Visit visit) {
         List<Diagnosis> diagnoses = new ArrayList<Diagnosis>();
 
-        List<Obs> observations = obsService.getObservations(Arrays.asList((Person) patient), new ArrayList<>(visit.getEncounters()),
-                Arrays.asList(bahmniDiagnosisMetadata.getDiagnosisSetConcept()), null, null, null, Arrays.asList("obsDatetime"),
+        List<Obs> observations = obsService.getObservations(asList((Person) patient), new ArrayList<>(visit.getEncounters()),
+                asList(bahmniDiagnosisMetadata.getDiagnosisSetConcept()), null, null, null, asList("obsDatetime"),
                 null, null, null, null, false);
 
         Collection<Concept> nonDiagnosisConcepts = emrApiProperties.getSuppressedDiagnosisConcepts();
@@ -150,9 +152,9 @@ public class BahmniDiagnosisServiceImpl implements BahmniDiagnosisService {
     private Obs getLatestObsGroupBasedOnAnyDiagnosis(Diagnosis diagnosis, Concept bahmniDiagnosisRevised) {
         String initialDiagnosisUuid = bahmniDiagnosisMetadata.findInitialDiagnosisUuid(diagnosis.getExistingObs());
 
-        List<Obs> observations = obsService.getObservations(Arrays.asList(diagnosis.getExistingObs().getPerson()), null,
-                Arrays.asList(bahmniDiagnosisRevised),
-                Arrays.asList(conceptService.getFalseConcept()), null, null, null,
+        List<Obs> observations = obsService.getObservations(asList(diagnosis.getExistingObs().getPerson()), null,
+                asList(bahmniDiagnosisRevised),
+                asList(conceptService.getFalseConcept()), null, null, null,
                 null, null, null, null, false);
 
         for (Obs obs : observations) {

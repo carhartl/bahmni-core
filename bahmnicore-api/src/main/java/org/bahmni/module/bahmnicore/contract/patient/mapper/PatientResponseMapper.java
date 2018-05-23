@@ -1,6 +1,5 @@
 package org.bahmni.module.bahmnicore.contract.patient.mapper;
 
-import java.util.Objects;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bahmni.module.bahmnicore.contract.patient.response.PatientResponse;
@@ -17,10 +16,12 @@ import org.openmrs.module.bahmniemrapi.visitlocation.BahmniVisitLocationServiceI
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.Arrays.asList;
 
 public class PatientResponseMapper {
     private PatientResponse patientResponse;
@@ -34,8 +35,8 @@ public class PatientResponseMapper {
     }
 
     public PatientResponse map(Patient patient, String loginLocationUuid, String[] searchResultFields, String[] addressResultFields, Object programAttributeValue) {
-        List<String> patientSearchResultFields = searchResultFields != null ? Arrays.asList(searchResultFields) : new ArrayList<>();
-        List<String> addressSearchResultFields = addressResultFields != null ? Arrays.asList(addressResultFields) : new ArrayList<>();
+        List<String> patientSearchResultFields = searchResultFields != null ? asList(searchResultFields) : new ArrayList<>();
+        List<String> addressSearchResultFields = addressResultFields != null ? asList(addressResultFields) : new ArrayList<>();
 
         Integer visitLocationId = bahmniVisitLocationService.getVisitLocation(loginLocationUuid).getLocationId();
         List<Visit> activeVisitsByPatient = visitService.getActiveVisitsByPatient(patient);

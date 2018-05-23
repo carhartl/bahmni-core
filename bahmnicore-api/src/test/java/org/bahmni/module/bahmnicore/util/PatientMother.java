@@ -9,9 +9,10 @@ import org.openmrs.module.webservices.rest.SimpleObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+
+import static java.util.Arrays.asList;
 
 public class PatientMother {
 
@@ -50,10 +51,10 @@ public class PatientMother {
         patient.addIdentifier(new PatientIdentifier(patientIdentifier, null, null));
         patient.addName(nameMother.build());
         patient.setPersonDateCreated(this.dateCreated);
-        patient.setAddresses(new HashSet<>(Arrays.asList(addressMother.build())));
+        patient.setAddresses(new HashSet<>(asList(addressMother.build())));
         PersonAttributeType personAttributeType = new PersonAttributeType();
         personAttributeType.setName("healthCenter");
-        patient.setAttributes(new HashSet<>(Arrays.asList(new PersonAttribute(personAttributeType, "Ganiyari"))));
+        patient.setAttributes(new HashSet<>(asList(new PersonAttribute(personAttributeType, "Ganiyari"))));
         return patient;
     }
 
@@ -62,12 +63,12 @@ public class PatientMother {
         SimpleObject simpleObject = new SimpleObject().add("birthdate", "01-01-2012")
                 .add("age", new SimpleObject().add("years", 21).add("months", 1).add("days", 3))
                 .add("gender", "M")
-                .add("attributes", Arrays.asList(new SimpleObject()
+                .add("attributes", asList(new SimpleObject()
                         .add("attributeType", "b3b6d540-a32e-44c7-91b3-292d97667518")
                         .add("value", "someCaste")))
-                .add("addresses", Arrays.asList(addressMother.getSimpleObjectForAddress()))
+                .add("addresses", asList(addressMother.getSimpleObjectForAddress()))
                 .add("centerID", "Ganiyari")
-                .add("names", Arrays.asList(nameMother.getSimpleObjectForName()))
+                .add("names", asList(nameMother.getSimpleObjectForName()))
                 .add("dateOfRegistration", dateCreatedString)
                 .add("identifier", patientIdentifier);
         if (balance != null) {

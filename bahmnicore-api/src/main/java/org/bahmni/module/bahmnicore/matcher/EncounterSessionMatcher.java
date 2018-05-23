@@ -22,12 +22,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static java.util.Arrays.asList;
 
 @Component
 public class EncounterSessionMatcher implements BaseEncounterMatcher {
@@ -79,7 +80,7 @@ public class EncounterSessionMatcher implements BaseEncounterMatcher {
             if (visit.getId() == null) { // To handle new Visit scenario where visit will not be persisted in DB and we get a visit obj (Called from emr-api).
                 return null;
             }
-            visits = Arrays.asList(visit);
+            visits = asList(visit);
         }
 
         if (null == encounterParameters.getEncounterDateTime()) {
@@ -90,7 +91,7 @@ public class EncounterSessionMatcher implements BaseEncounterMatcher {
         Collection<Encounter> encounters = this.encounterService.getEncounters(encounterParameters.getPatient(), null,
                 getSearchStartDate(encounterParameters.getEncounterDateTime()),
                 encounterParameters.getEncounterDateTime(), new ArrayList<Form>(),
-                Arrays.asList(encounterParameters.getEncounterType()),
+                asList(encounterParameters.getEncounterType()),
                 encounterParameters.getProviders(), null, visits, false);
 
         Map<String, Object> context = encounterParameters.getContext();

@@ -31,13 +31,14 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static java.util.Arrays.asList;
 
 @Component
 public class OrderDaoImpl implements OrderDao {
@@ -364,7 +365,7 @@ public class OrderDaoImpl implements OrderDao {
 
             return getAllOrders(patientByUuid, drugOrderTypeUuid, null, null, encounters);
         }
-        return getAllOrders(patientByUuid, Arrays.asList(drugOrderTypeUuid), offset, limit);
+        return getAllOrders(patientByUuid, asList(drugOrderTypeUuid), offset, limit);
     }
 
     @Override
