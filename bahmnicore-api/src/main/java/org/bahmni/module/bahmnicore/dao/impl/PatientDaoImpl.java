@@ -128,6 +128,10 @@ public class PatientDaoImpl implements PatientDao {
     }
 
     private List<Patient> getPatientsByNameAndGender(String name, String gender, Integer length) {
+        if(isNullOrEmpty(name, gender)) {
+            return new ArrayList<>();
+        }
+
         HibernatePatientDAO patientDAO = new HibernatePatientDAO();
         patientDAO.setSessionFactory(sessionFactory);
         List<Patient> patients = new ArrayList<Patient>();
@@ -143,6 +147,10 @@ public class PatientDaoImpl implements PatientDao {
         persons = persons.subList(0, Math.min(length, persons.size()));
         persons.forEach(person -> patients.add(new Patient(person.getPerson())));
         return patients;
+    }
+
+    private Boolean isNullOrEmpty(String name, String gender) {
+        return (name == null || name.trim().isEmpty()) && (gender == null || gender.isEmpty());
     }
 
 
