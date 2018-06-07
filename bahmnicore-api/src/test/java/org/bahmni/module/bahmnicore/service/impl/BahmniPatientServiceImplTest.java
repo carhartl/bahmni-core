@@ -76,11 +76,10 @@ public class BahmniPatientServiceImplTest {
     }
 
     @Test
-    public void shouldCallgetSimilarPatientsUsingLuceneSearch() {
+    public void shouldCallGetSimilarPatientsUsingLuceneSearch() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(requestContext.getRequest()).thenReturn(request);
         when(request.getParameterMap()).thenReturn(new HashMap<>());
-
         PatientSearchParameters patientSearchParameters = new PatientSearchParameters(requestContext);
         patientSearchParameters.setName("John");
         patientSearchParameters.setGender("M");
