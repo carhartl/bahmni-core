@@ -86,6 +86,6 @@ public class BahmniPatientServiceImplTest {
         patientSearchParameters.setLoginLocationUuid("someUUid");
 
         bahmniPatientService.searchSimilarPatients(patientSearchParameters);
-        verify(patientDao).getSimilarPatientsUsingLuceneSearch("John", "M", "someUUid", 5);
+        verify(patientDao).getSimilarPatientsUsingLuceneSearch("John", null, "M", "someUUid", 5);
     }
 }

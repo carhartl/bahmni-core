@@ -87,7 +87,7 @@ public class BahmniPatientServiceImpl implements BahmniPatientService {
     @Override
     public List<PatientResponse> searchSimilarPatients(PatientSearchParameters searchParameters) {
         return patientDao.getSimilarPatientsUsingLuceneSearch(searchParameters.getName(),
-                searchParameters.getGender(),
+                null, searchParameters.getGender(),
                 searchParameters.getLoginLocationUuid(),
                 SIMILAR_PATIENT_RESULT_LENGTH);
     }

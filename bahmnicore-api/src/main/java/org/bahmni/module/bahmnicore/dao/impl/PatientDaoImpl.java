@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -101,9 +100,9 @@ public class PatientDaoImpl implements PatientDao {
     }
 
     @Override
-    public List<PatientResponse> getSimilarPatientsUsingLuceneSearch(String name, String gender, String loginLocationUuid, Integer length) {
+    public List<PatientResponse> getSimilarPatientsUsingLuceneSearch(String giveName, String familyName, String gender, String loginLocationUuid, Integer length) {
         PatientResponseMapper patientResponseMapper = new PatientResponseMapper(Context.getVisitService(),new BahmniVisitLocationServiceImpl(Context.getLocationService()));
-        List<Patient> patients = getPatientsByNameAndGender(name, gender, length);
+        List<Patient> patients = getPatientsByNamesAndGender(giveName, , gender, length);
         List<PatientResponse> patientResponses = patients.stream()
                 .map(patient -> {return patientResponseMapper.map(patient, loginLocationUuid, null, null,null);}).filter(Objects::nonNull)
                 .collect(toList());
@@ -121,23 +120,25 @@ public class PatientDaoImpl implements PatientDao {
         }
     }
 
-    private List<Patient> getPatientsByNameAndGender(String name, String gender, Integer length) {
-        if(isNullOrEmpty(name, gender)) {
+    private List<Patient> getPatientsByNamesAndGender(String givenName, String familyName, String gender, Integer length) {
+        if(isNullOrEmpty(givenName, gender)) {
             return new ArrayList<>();
         }
 
         HibernatePatientDAO patientDAO = new HibernatePatientDAO();
         patientDAO.setSessionFactory(sessionFactory);
         List<Patient> patients = new ArrayList<Patient>();
-        String query = LuceneQuery.escapeQuery(name);
+        String query = LuceneQuery.escapeQuery(givenName);
         PersonLuceneQuery personLuceneQuery = new PersonLuceneQuery(sessionFactory);
         LuceneQuery<PersonName> nameQuery = personLuceneQuery.getPatientNameQueryWithOrParser(query, false);
         List<PersonName> persons = nameQuery.list().stream()
                                     .filter(
                                         personName ->
                                             personName.getPreferred()
+                                                    && familyName.getPreferred()
                                             && checkGender(personName.getPerson(), gender)
-                                    ).collect(toList());
+                                    )
+                .collect(toList());
         persons = persons.subList(0, Math.min(length, persons.size()));
         persons.forEach(person -> patients.add(new Patient(person.getPerson())));
         return patients;
